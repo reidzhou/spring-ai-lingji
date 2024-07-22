@@ -15,6 +15,7 @@
  */
 package com.reid.spring.ai.lingji.core;
 
+import com.reid.spring.ai.lingji.core.model.chat.LingJiOpenSourceChatModel;
 import com.reid.spring.ai.lingji.core.model.embeddings.LingJiEmbeddingModel;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,11 @@ public class LingJiTestConfiguration {
 	@Bean
 	public LingJiEmbeddingModel lingJiEmbeddingModel() {
 		return new LingJiEmbeddingModel(getApiKey());
+	}
+
+	@Bean
+	public LingJiOpenSourceChatModel lingJiOpenSourceChatModel() {
+		return new LingJiOpenSourceChatModel(getApiKey());
 	}
 
 	private String getApiKey() {

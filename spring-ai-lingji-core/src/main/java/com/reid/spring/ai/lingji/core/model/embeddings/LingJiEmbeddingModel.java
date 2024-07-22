@@ -1,5 +1,6 @@
 package com.reid.spring.ai.lingji.core.model.embeddings;
 
+import com.reid.spring.ai.lingji.core.exception.LingJiRPCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
@@ -97,7 +98,7 @@ public class LingJiEmbeddingModel extends AbstractEmbeddingModel {
         if (this.logger.isDebugEnabled()) {
             this.logger.debug(
                     "Request LingJi Embedding Model [ url = {}, request = {} ]",
-                    Constants.LING_JI_EMBEDDINGS_URL, request);
+                    Constants.LING_JI_EMBEDDINGS_URL, ModelOptionsUtils.toJsonString(request));
         }
 
         ResponseEntity<LingJiEmbeddingsResponse> responseEntity = this.restClient
@@ -118,7 +119,7 @@ public class LingJiEmbeddingModel extends AbstractEmbeddingModel {
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug(
                         "Request LingJi Embedding Model Success [ response = {} ]",
-                        lingJiEmbeddingsResponse);
+                        ModelOptionsUtils.toJsonString(lingJiEmbeddingsResponse));
             }
 
             return lingJiEmbeddingsResponse;
@@ -129,14 +130,14 @@ public class LingJiEmbeddingModel extends AbstractEmbeddingModel {
                         "Request LingJi Embedding Model failed [ http_code = {} ]",
                         httpStatusCode.value());
 
-                throw new LingJiEmbeddingsException(httpStatusCode.value());
+                throw new LingJiRPCException(httpStatusCode.value());
             } else {
 
                 this.logger.debug(
                         "Request LingJi Embedding Model failed [ http_code = {}, err = {} ]",
-                        httpStatusCode.value(), lingJiEmbeddingsResponse);
+                        httpStatusCode.value(), ModelOptionsUtils.toJsonString(lingJiEmbeddingsResponse));
 
-                throw new LingJiEmbeddingsException(
+                throw new LingJiRPCException(
                         httpStatusCode.value(),
                         lingJiEmbeddingsResponse.getRequestId(),
                         lingJiEmbeddingsResponse.getCode(),
