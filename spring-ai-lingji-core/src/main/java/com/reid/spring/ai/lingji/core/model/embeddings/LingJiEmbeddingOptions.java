@@ -1,6 +1,5 @@
-package com.reid.spring.ai.lingji.core;
+package com.reid.spring.ai.lingji.core.model.embeddings;
 
-import com.alibaba.dashscope.embeddings.TextEmbedding;
 import org.springframework.ai.embedding.EmbeddingOptions;
 import org.springframework.util.Assert;
 
@@ -50,12 +49,12 @@ public class LingJiEmbeddingOptions implements EmbeddingOptions {
     private void doCheckModel(String model) {
         Assert.notNull(model, "The model can not be null.");
         Assert.isTrue(
-                TextEmbedding.Models.TEXT_EMBEDDING_V1.equals(model)
-                        || TextEmbedding.Models.TEXT_EMBEDDING_V2.equals(model),
+                Constants.LING_JI_EMBEDDINGS_V1.equals(model)
+                        || Constants.LING_JI_EMBEDDINGS_V2.equals(model),
                 String.format(
                         "The embedding model type is illegal, must be %s or %s",
-                        TextEmbedding.Models.TEXT_EMBEDDING_V1,
-                        TextEmbedding.Models.TEXT_EMBEDDING_V2
+                        Constants.LING_JI_EMBEDDINGS_V1,
+                        Constants.LING_JI_EMBEDDINGS_V2
                 )
         );
     }

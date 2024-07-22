@@ -1,28 +1,38 @@
 package com.reid.spring.ai.lingji.autoconfigure;
 
-import com.alibaba.dashscope.aigc.generation.Generation;
-import com.alibaba.dashscope.embeddings.TextEmbedding;
-import com.alibaba.dashscope.protocol.Protocol;
-import com.reid.spring.ai.lingji.core.LingJiChatModel;
-import com.reid.spring.ai.lingji.core.LingJiEmbeddingModel;
+import com.reid.spring.ai.lingji.core.model.embeddings.LingJiEmbeddingModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 
 @AutoConfiguration(after = { SpringAiRetryAutoConfiguration.class })
-@EnableConfigurationProperties({ LingJiEmbeddingProperties.class, LingJiChatProperties.class })
+@EnableConfigurationProperties({
+        LingJiConnectionProperties.class,
+        LingJiEmbeddingProperties.class
+})
 @ImportAutoConfiguration(classes = { SpringAiRetryAutoConfiguration.class })
 public class LingJiAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = LingJiEmbeddingProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
-    public TextEmbedding textEmbedding(LingJiEmbeddingProperties lingJiEmbeddingProperties) {
-        return new TextEmbedding(lingJiEmbeddingProperties.getBaseUrl());
+    public RestClient restClient(LingJiConnectionProperties connectionProperties) {
+        ClientHttpRequestFactorySettings settings = new ClientHttpRequestFactorySettings(
+                connectionProperties.getConnectTimeout(),
+                connectionProperties.getReadTimeout(),
+                (SslBundle) null
+        );
+
+        return RestClient
+                .builder()
+                .requestFactory(ClientHttpRequestFactories.get(settings))
+                .build();
     }
 
     @Bean
@@ -30,64 +40,13 @@ public class LingJiAutoConfiguration {
     @ConditionalOnProperty(prefix = LingJiEmbeddingProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
     public LingJiEmbeddingModel lingJiEmbeddingModel(
             LingJiEmbeddingProperties lingJiEmbeddingProperties,
-            TextEmbedding textEmbedding,
-            RetryTemplate retryTemplate) {
+            RestClient restClient) {
         return new LingJiEmbeddingModel(
                 lingJiEmbeddingProperties.getApiKey(),
-                textEmbedding,
+                restClient,
                 lingJiEmbeddingProperties.getMetadataMode(),
-                retryTemplate
+                lingJiEmbeddingProperties.getOptions()
         );
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = LingJiChatProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
-    public Generation generation(LingJiChatProperties lingJiChatProperties) {
-        return new Generation(
-                Protocol.HTTP.getValue(),
-                lingJiChatProperties.getBaseUrl(),
-                lingJiChatProperties.getConnection()
-        );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = LingJiChatProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
-    public LingJiChatModel lingJiChatModel() {
-        return null;
-    }
-
-//	@Bean
-//	@ConditionalOnMissingBean
-//	public AnthropicApi anthropicApi(AnthropicConnectionProperties connectionProperties,
-//			RestClient.Builder restClientBuilder, ResponseErrorHandler responseErrorHandler) {
-//
-//		return new AnthropicApi(connectionProperties.getBaseUrl(), connectionProperties.getApiKey(),
-//				connectionProperties.getVersion(), restClientBuilder, responseErrorHandler,
-//				connectionProperties.getBetaVersion());
-//	}
-//
-//	@Bean
-//	@ConditionalOnMissingBean
-//	public AnthropicChatModel anthropicChatModel(AnthropicApi anthropicApi, AnthropicChatProperties chatProperties,
-//			RetryTemplate retryTemplate, FunctionCallbackContext functionCallbackContext,
-//			List<FunctionCallback> toolFunctionCallbacks) {
-//
-//		if (!CollectionUtils.isEmpty(toolFunctionCallbacks)) {
-//			chatProperties.getOptions().getFunctionCallbacks().addAll(toolFunctionCallbacks);
-//		}
-//
-//		return new AnthropicChatModel(anthropicApi, chatProperties.getOptions(), retryTemplate,
-//				functionCallbackContext);
-//	}
-//
-//	@Bean
-//	@ConditionalOnMissingBean
-//	public FunctionCallbackContext springAiFunctionManager(ApplicationContext context) {
-//		FunctionCallbackContext manager = new FunctionCallbackContext();
-//		manager.setApplicationContext(context);
-//		return manager;
-//	}
 
 }

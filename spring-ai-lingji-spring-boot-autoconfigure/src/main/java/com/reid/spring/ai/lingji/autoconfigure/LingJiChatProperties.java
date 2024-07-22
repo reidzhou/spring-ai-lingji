@@ -2,8 +2,6 @@ package com.reid.spring.ai.lingji.autoconfigure;
 
 import com.alibaba.dashscope.embeddings.TextEmbedding;
 import com.alibaba.dashscope.protocol.ConnectionOptions;
-import com.reid.spring.ai.lingji.core.LingJiEmbeddingOptions;
-import org.springframework.ai.document.MetadataMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 

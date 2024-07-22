@@ -1,7 +1,7 @@
 package com.reid.spring.ai.lingji.autoconfigure;
 
-import com.alibaba.dashscope.embeddings.TextEmbedding;
-import com.reid.spring.ai.lingji.core.LingJiEmbeddingOptions;
+import com.reid.spring.ai.lingji.core.model.embeddings.Constants;
+import com.reid.spring.ai.lingji.core.model.embeddings.LingJiEmbeddingOptions;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -11,13 +11,11 @@ public class LingJiEmbeddingProperties extends LingJiBaseProperties {
 
     public static final String CONFIG_PREFIX = "spring.ai.lingji.embedding";
 
-    public static final String DEFAULT_EMBEDDING_MODEL = TextEmbedding.Models.TEXT_EMBEDDING_V1;
-
     private MetadataMode metadataMode = MetadataMode.EMBED;
 
     @NestedConfigurationProperty
     private LingJiEmbeddingOptions options = LingJiEmbeddingOptions.builder()
-            .withModel(DEFAULT_EMBEDDING_MODEL)
+            .withModel(Constants.LING_JI_EMBEDDINGS_V1)
             .build();
 
     public MetadataMode getMetadataMode() {
