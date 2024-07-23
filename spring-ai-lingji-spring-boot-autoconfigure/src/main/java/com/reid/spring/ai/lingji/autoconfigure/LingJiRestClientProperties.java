@@ -4,10 +4,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
-@ConfigurationProperties(LingJiConnectionProperties.CONFIG_PREFIX)
-public class LingJiConnectionProperties {
+@ConfigurationProperties(LingJiRestClientProperties.CONFIG_PREFIX)
+public class LingJiRestClientProperties {
 
-    public static final String CONFIG_PREFIX = "spring.ai.lingji.connect";
+    public static final String CONFIG_PREFIX = "spring.ai.lingji.rest.client";
 
     private Duration connectTimeout;
 

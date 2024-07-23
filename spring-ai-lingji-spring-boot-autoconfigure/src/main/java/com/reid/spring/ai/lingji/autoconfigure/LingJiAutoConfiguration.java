@@ -1,5 +1,6 @@
 package com.reid.spring.ai.lingji.autoconfigure;
 
+import com.reid.spring.ai.lingji.core.model.chat.LingJiOpenSourceChatModel;
 import com.reid.spring.ai.lingji.core.model.embeddings.LingJiEmbeddingModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -10,22 +11,27 @@ import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @AutoConfiguration(after = { SpringAiRetryAutoConfiguration.class })
 @EnableConfigurationProperties({
-        LingJiConnectionProperties.class,
-        LingJiEmbeddingProperties.class
+        LingJiRestClientProperties.class,
+        LingJiWebClientProperties.class,
+        LingJiEmbeddingProperties.class,
+        LingJiChatProperties.class
 })
 @ImportAutoConfiguration(classes = { SpringAiRetryAutoConfiguration.class })
 public class LingJiAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RestClient restClient(LingJiConnectionProperties connectionProperties) {
+    public RestClient restClient(LingJiRestClientProperties properties) {
         ClientHttpRequestFactorySettings settings = new ClientHttpRequestFactorySettings(
-                connectionProperties.getConnectTimeout(),
-                connectionProperties.getReadTimeout(),
+                properties.getConnectTimeout(),
+                properties.getReadTimeout(),
                 (SslBundle) null
         );
 
@@ -46,6 +52,30 @@ public class LingJiAutoConfiguration {
                 restClient,
                 lingJiEmbeddingProperties.getMetadataMode(),
                 lingJiEmbeddingProperties.getOptions()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public WebClient webClient(LingJiWebClientProperties properties, @Nullable ClientHttpConnector clientHttpConnector) {
+        return WebClient
+                .builder()
+                .clientConnector(clientHttpConnector)
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = LingJiChatProperties.CONFIG_PREFIX, name = "useOpenSourceModel", havingValue = "true")
+    public LingJiOpenSourceChatModel lingJiOpenSourceChatModel(
+            LingJiChatProperties lingJiChatProperties,
+            RestClient restClient,
+            WebClient webClient) {
+        return new LingJiOpenSourceChatModel(
+                lingJiChatProperties.getApiKey(),
+                restClient,
+                webClient,
+                lingJiChatProperties.getOpenSourceOptions()
         );
     }
 

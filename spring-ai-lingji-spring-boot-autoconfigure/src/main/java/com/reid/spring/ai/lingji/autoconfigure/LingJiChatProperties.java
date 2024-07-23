@@ -1,7 +1,6 @@
 package com.reid.spring.ai.lingji.autoconfigure;
 
-import com.alibaba.dashscope.embeddings.TextEmbedding;
-import com.alibaba.dashscope.protocol.ConnectionOptions;
+import com.reid.spring.ai.lingji.core.model.chat.LingJiOpenSourceChatOptions;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -10,16 +9,28 @@ public class LingJiChatProperties extends LingJiBaseProperties {
 
     public static final String CONFIG_PREFIX = "spring.ai.lingji.chat";
 
-    public static final String DEFAULT_CHAT_MODEL = TextEmbedding.Models.TEXT_EMBEDDING_V1;
+    private Boolean useOpenSourceModel = true;
 
     @NestedConfigurationProperty
-    private ConnectionOptions connection = ConnectionOptions.builder().build();
+    private LingJiOpenSourceChatOptions openSourceOptions = new LingJiOpenSourceChatOptions();
 
-    public ConnectionOptions getConnection() {
-        return connection;
+//    @NestedConfigurationProperty
+//    private LingJiOpenSourceChatOptions closedSourceOptions = new LingJiOpenSourceChatOptions();
+
+
+    public Boolean getUseOpenSourceModel() {
+        return useOpenSourceModel;
     }
 
-    public void setConnection(ConnectionOptions connection) {
-        this.connection = connection;
+    public void setUseOpenSourceModel(Boolean useOpenSourceModel) {
+        this.useOpenSourceModel = useOpenSourceModel;
+    }
+
+    public LingJiOpenSourceChatOptions getOpenSourceOptions() {
+        return openSourceOptions;
+    }
+
+    public void setOpenSourceOptions(LingJiOpenSourceChatOptions openSourceOptions) {
+        this.openSourceOptions = openSourceOptions;
     }
 }
