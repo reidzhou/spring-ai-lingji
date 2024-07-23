@@ -10,7 +10,7 @@ public class LingJiOpenSourceChatOptions implements ChatOptions {
     @JsonProperty(value = "model")
     private String model = Constants.OpenSourceModel.QWEN_2_72B.getName();
     @JsonProperty(value = "result_format")
-    private String resultFormat = "message";
+    private String resultFormat = Constants.OPEN_AI_RESULT_FORMAT;
     @JsonProperty(value = "seed")
     private Integer seed = 1234;
     @JsonProperty(value = "max_tokens")
@@ -35,7 +35,7 @@ public class LingJiOpenSourceChatOptions implements ChatOptions {
     @JsonProperty(value = "stop")
     private Object stop;
     @JsonProperty(value = "incremental_output")
-    private Boolean incrementalOutput;
+    private Boolean incrementalOutput = false;
 
 
     public String getModel() {
