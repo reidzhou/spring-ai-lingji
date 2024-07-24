@@ -1,6 +1,7 @@
-package com.reid.spring.ai.lingji.autoconfigure;
+package com.reid.spring.ai.lingji.autoconfigure.chat;
 
-import com.reid.spring.ai.lingji.core.model.chat.LingJiOpenSourceChatOptions;
+import com.reid.spring.ai.lingji.autoconfigure.LingJiBaseProperties;
+import com.reid.spring.ai.lingji.core.model.chat.LingJiChatOptions;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -12,10 +13,7 @@ public class LingJiChatProperties extends LingJiBaseProperties {
     private Boolean useOpenSourceModel = true;
 
     @NestedConfigurationProperty
-    private LingJiOpenSourceChatOptions openSourceOptions = new LingJiOpenSourceChatOptions();
-
-//    @NestedConfigurationProperty
-//    private LingJiOpenSourceChatOptions closedSourceOptions = new LingJiOpenSourceChatOptions();
+    private LingJiChatOptions openSourceOptions = new LingJiChatOptions();
 
 
     public Boolean getUseOpenSourceModel() {
@@ -26,11 +24,11 @@ public class LingJiChatProperties extends LingJiBaseProperties {
         this.useOpenSourceModel = useOpenSourceModel;
     }
 
-    public LingJiOpenSourceChatOptions getOpenSourceOptions() {
+    public LingJiChatOptions getOpenSourceOptions() {
         return openSourceOptions;
     }
 
-    public void setOpenSourceOptions(LingJiOpenSourceChatOptions openSourceOptions) {
+    public void setOpenSourceOptions(LingJiChatOptions openSourceOptions) {
         this.openSourceOptions = openSourceOptions;
     }
 }

@@ -1,5 +1,5 @@
 package com.reid.spring.ai.lingji.autoconfigure;
-class LingJiBaseProperties {
+public class LingJiBaseProperties {
 
     private String apiKey;
 

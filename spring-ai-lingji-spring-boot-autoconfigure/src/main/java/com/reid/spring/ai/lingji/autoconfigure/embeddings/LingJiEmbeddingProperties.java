@@ -1,5 +1,6 @@
-package com.reid.spring.ai.lingji.autoconfigure;
+package com.reid.spring.ai.lingji.autoconfigure.embeddings;
 
+import com.reid.spring.ai.lingji.autoconfigure.LingJiBaseProperties;
 import com.reid.spring.ai.lingji.core.model.embeddings.Constants;
 import com.reid.spring.ai.lingji.core.model.embeddings.LingJiEmbeddingOptions;
 import org.springframework.ai.document.MetadataMode;
@@ -9,7 +10,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(LingJiEmbeddingProperties.CONFIG_PREFIX)
 public class LingJiEmbeddingProperties extends LingJiBaseProperties {
 
-    public static final String CONFIG_PREFIX = "spring.ai.lingji.embedding";
+    public static final String CONFIG_PREFIX = "spring.ai.lingji.embeddings";
 
     private MetadataMode metadataMode = MetadataMode.EMBED;
 

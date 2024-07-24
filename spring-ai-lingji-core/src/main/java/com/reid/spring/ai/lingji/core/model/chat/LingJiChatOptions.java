@@ -3,12 +3,19 @@ package com.reid.spring.ai.lingji.core.model.chat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.model.function.FunctionCallback;
+import org.springframework.ai.model.function.FunctionCallingOptions;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LingJiOpenSourceChatOptions implements ChatOptions {
+public class LingJiChatOptions implements FunctionCallingOptions, ChatOptions {
 
     @JsonProperty(value = "model")
-    private String model = Constants.OpenSourceModel.QWEN_2_72B.getName();
+    private String model = ChatModel.QWEN_TURBO.getName();
     @JsonProperty(value = "result_format")
     private String resultFormat = Constants.OPEN_AI_RESULT_FORMAT;
     @JsonProperty(value = "seed")
@@ -36,6 +43,17 @@ public class LingJiOpenSourceChatOptions implements ChatOptions {
     private Object stop;
     @JsonProperty(value = "incremental_output")
     private Boolean incrementalOutput = false;
+    @JsonProperty(value = "enable_search")
+    private Boolean enableSearch = false;
+    @JsonProperty(value = "tools")
+    private List<Parameters.Tool> tools;
+    // none or auto or ToolChoice object
+    @JsonProperty(value = "tool_choice")
+    private Object toolChoice;
+
+    private List<FunctionCallback> functionCallbacks = new ArrayList<>();
+
+    private Set<String> functions = new HashSet<>();
 
 
     public String getModel() {
@@ -127,5 +145,49 @@ public class LingJiOpenSourceChatOptions implements ChatOptions {
 
     public void setIncrementalOutput(Boolean incrementalOutput) {
         this.incrementalOutput = incrementalOutput;
+    }
+
+    public Boolean getEnableSearch() {
+        return enableSearch;
+    }
+
+    public void setEnableSearch(Boolean enableSearch) {
+        this.enableSearch = enableSearch;
+    }
+
+    public List<Parameters.Tool> getTools() {
+        return tools;
+    }
+
+    public void setTools(List<Parameters.Tool> tools) {
+        this.tools = tools;
+    }
+
+    public Object getToolChoice() {
+        return toolChoice;
+    }
+
+    public void setToolChoice(Object toolChoice) {
+        this.toolChoice = toolChoice;
+    }
+
+    @Override
+    public List<FunctionCallback> getFunctionCallbacks() {
+        return this.functionCallbacks;
+    }
+
+    @Override
+    public void setFunctionCallbacks(List<FunctionCallback> functionCallbacks) {
+        this.functionCallbacks = functionCallbacks;
+    }
+
+    @Override
+    public Set<String> getFunctions() {
+        return this.functions;
+    }
+
+    @Override
+    public void setFunctions(Set<String> functions) {
+        this.functions = functions;
     }
 }

@@ -19,12 +19,12 @@ import java.util.concurrent.CountDownLatch;
 public class LingJiOpenSourceChatModelTest {
 
     @Resource
-    LingJiOpenSourceChatModel lingJiOpenSourceChatModel;
+    LingJiChatModel lingJiChatModel;
 
     @Test
     void testSingleQuestionChat() {
 
-        String answer = lingJiOpenSourceChatModel.call("who are you?");
+        String answer = lingJiChatModel.call("who are you?");
         System.out.println(answer);
 
     }
@@ -38,7 +38,7 @@ public class LingJiOpenSourceChatModelTest {
         // first question
         messageList.add(new UserMessage("who are you?"));
         Prompt prompt = new Prompt(messageList);
-        ChatResponse chatResponse = lingJiOpenSourceChatModel.call(prompt);
+        ChatResponse chatResponse = lingJiChatModel.call(prompt);
 
         String answer = chatResponse.getResult().getOutput().getContent();
         System.out.println(answer);
@@ -47,7 +47,7 @@ public class LingJiOpenSourceChatModelTest {
         messageList.add(new AssistantMessage(answer));
         messageList.add(new UserMessage("What can you do for me?"));
         prompt = new Prompt(messageList);
-        chatResponse = lingJiOpenSourceChatModel.call(prompt);
+        chatResponse = lingJiChatModel.call(prompt);
         answer = chatResponse.getResult().getOutput().getContent();
         System.out.println(answer);
     }
@@ -75,12 +75,12 @@ public class LingJiOpenSourceChatModelTest {
 
         messageList.add(new UserMessage("How to write a paper?"));
 
-        LingJiOpenSourceChatOptions lingJiOpenSourceChatOptions = new LingJiOpenSourceChatOptions();
+        LingJiChatOptions lingJiOpenSourceChatOptions = new LingJiChatOptions();
 
         final ObjectHolder<String> holder = new ObjectHolder<>();
 
         Prompt prompt = new Prompt(messageList, lingJiOpenSourceChatOptions);
-        Flux<ChatResponse> chatResponseFlux = lingJiOpenSourceChatModel.stream(prompt);
+        Flux<ChatResponse> chatResponseFlux = lingJiChatModel.stream(prompt);
         Disposable disposable = chatResponseFlux.subscribe(chatResponse -> {
             if (!chatResponse.getResult().getMetadata().getFinishReason().equals(Constants.FINISH_REASON_NULL)) {
                 holder.setData(chatResponse.getResult().getOutput().getContent());
@@ -159,14 +159,14 @@ public class LingJiOpenSourceChatModelTest {
 
         messageList.add(new UserMessage("How to write a paper?"));
 
-        LingJiOpenSourceChatOptions lingJiOpenSourceChatOptions = new LingJiOpenSourceChatOptions();
-        lingJiOpenSourceChatOptions.setIncrementalOutput(true);
+        LingJiChatOptions options = new LingJiChatOptions();
+        options.setIncrementalOutput(true);
 
         StringBuilder sb = new StringBuilder();
 
 
-        Prompt prompt = new Prompt(messageList, lingJiOpenSourceChatOptions);
-        Flux<ChatResponse> chatResponseFlux = lingJiOpenSourceChatModel.stream(prompt);
+        Prompt prompt = new Prompt(messageList, options);
+        Flux<ChatResponse> chatResponseFlux = lingJiChatModel.stream(prompt);
         Disposable disposable = chatResponseFlux.subscribe(chatResponse -> {
 
             sb.append(chatResponse.getResult().getOutput().getContent());
