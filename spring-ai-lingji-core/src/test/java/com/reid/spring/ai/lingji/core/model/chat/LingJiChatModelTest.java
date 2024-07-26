@@ -7,16 +7,21 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.ModelOptionsUtils;
+import org.springframework.ai.model.function.FunctionCallbackWrapper;
+import org.springframework.ai.model.function.FunctionCallingOptions;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
 
 @SpringBootTest
-public class LingJiOpenSourceChatModelTest {
+public class LingJiChatModelTest {
 
     @Resource
     LingJiChatModel lingJiChatModel;
@@ -232,6 +237,56 @@ public class LingJiOpenSourceChatModelTest {
         //                        - Consider how you can improve in your next writing project.
         //
         //                Writing a paper is an iterative process. Don't be afraid to go back and revise earlier sections as you continue to develop your ideas. Happy writing!
+    }
+
+    public static class WeatherServiceReq {}
+    public static class WeatherServiceRes {}
+    public static class WeatherService implements Function<WeatherServiceReq, WeatherServiceRes> {
+
+        @Override
+        public WeatherServiceRes apply(WeatherServiceReq weatherServiceReq) {
+            return null;
+        }
+    }
+
+    @Test
+    void testFunctionCalling() {
+
+        FunctionCallbackWrapper<WeatherServiceReq, WeatherServiceRes> functionCallbackWrapper = FunctionCallbackWrapper.builder(new WeatherService())
+                .withName("CurrentWeatherService")
+                .withDescription("Get the weather in location")
+                .withResponseConverter(new Function<WeatherServiceRes, String>() {
+                    @Override
+                    public String apply(WeatherServiceRes weatherServiceRes) {
+                        return "The temperature in Hangzhou is 28 degrees Celsius";
+                    }
+                })
+                .build();
+
+        Parameters.Tool tool = new Parameters.Tool(
+                new Parameters.Tool.Function(
+                        "CurrentWeatherService",
+                        "Get the weather of location",
+                        new Object()
+                )
+        );
+
+        LingJiChatOptions options = new LingJiChatOptions();
+        options.setModel(ChatModel.QWEN_TURBO.getName());
+        options.setFunctionCallbacks(Collections.singletonList(functionCallbackWrapper));
+        options.setTools(Collections.singletonList(tool));
+
+        Message message = new UserMessage("Hangzhou weather");
+
+        Prompt prompt = new Prompt(Collections.singletonList(message), options);
+
+        ChatResponse chatResponse = lingJiChatModel.call(prompt);
+
+        System.out.println(ModelOptionsUtils.toJsonString(chatResponse));
+
+        // for example:
+        // The current weather in Hangzhou is 28 degrees Celsius.
+
     }
 
 }

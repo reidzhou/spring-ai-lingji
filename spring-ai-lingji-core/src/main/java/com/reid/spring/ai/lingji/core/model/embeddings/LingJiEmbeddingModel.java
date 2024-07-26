@@ -95,11 +95,9 @@ public class LingJiEmbeddingModel extends AbstractEmbeddingModel {
     }
 
     private LingJiEmbeddingsResponse doRpc(LingJiEmbeddingsRequest request) {
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug(
-                    "Request LingJi Embedding Model [ url = {}, request = {} ]",
-                    Constants.LING_JI_EMBEDDINGS_URL, ModelOptionsUtils.toJsonString(request));
-        }
+        this.logger.debug(
+                "Request LingJi Embedding Model [ url = {}, request = {} ]",
+                Constants.LING_JI_EMBEDDINGS_URL, ModelOptionsUtils.toJsonString(request));
 
         ResponseEntity<LingJiEmbeddingsResponse> responseEntity = this.restClient
                 .post()
@@ -116,11 +114,9 @@ public class LingJiEmbeddingModel extends AbstractEmbeddingModel {
         HttpStatusCode httpStatusCode = responseEntity.getStatusCode();
 
         if (httpStatusCode.is2xxSuccessful()) {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug(
-                        "Request LingJi Embedding Model Success [ response = {} ]",
-                        ModelOptionsUtils.toJsonString(lingJiEmbeddingsResponse));
-            }
+            this.logger.debug(
+                    "Request LingJi Embedding Model Success [ response = {} ]",
+                    ModelOptionsUtils.toJsonString(lingJiEmbeddingsResponse));
 
             return lingJiEmbeddingsResponse;
         } else {

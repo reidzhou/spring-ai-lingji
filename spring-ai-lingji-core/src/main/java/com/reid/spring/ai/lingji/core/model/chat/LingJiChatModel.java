@@ -81,7 +81,11 @@ public class LingJiChatModel
     @Override
     public ChatResponse call(Prompt prompt) {
         LingJiChatRequest request = this.doCreateRequest(prompt);
-        return this.doCreateChatResponse(request, this.callWithFunctionSupport(request));
+        try {
+            return this.doCreateChatResponse(request, this.callWithFunctionSupport(request));
+        } catch (Exception e) {
+            throw new LingJiException("LingJi chat model exception", e);
+        }
     }
 
     @Override
@@ -100,23 +104,45 @@ public class LingJiChatModel
     protected LingJiChatRequest doCreateToolResponseRequest(LingJiChatRequest previousRequest,
                                                             Message responseMessage,
                                                             List<Message> conversationHistory) {
-        LingJiChatRequest currentRequest = new LingJiChatRequest();
-        currentRequest.setModel(previousRequest.getModel());
-        currentRequest.setParameters(previousRequest.getParameters());
-
+        // toolCalls, one or more ?
         Message.ToolCall.Function function = responseMessage.toolCalls().get(0).function();
         String functionName = function.name();
         String arguments = function.arguments();
 
+        this.logger.debug("Prepare to invoke function calling[ name = {}, arguments = {} ]", functionName, arguments);
+
         List<FunctionCallback> functionCallbacks = this.resolveFunctionCallbacks(Collections.singleton(functionName));
+        if (functionCallbacks.isEmpty()) {
+            throw new LingJiException(String.format("Function calling[ name = %s ] is not existed.", functionName));
+        }
+
+        // specific case
+        if (arguments.equals("\"{}\"")) {
+            arguments = "{}";
+        }
         FunctionCallback functionCallback = functionCallbacks.get(0);
         String functionCallingResult = functionCallback.call(arguments);
+
+        this.logger.debug(
+                "Function calling invoked[ name = {}, arguments = {}, result = {} ]",
+                functionName,
+                arguments,
+                functionCallingResult
+        );
 
         Message functionCallingMessage = new Message(Role.tool, functionCallingResult, functionName);
 
         conversationHistory.add(functionCallingMessage);
 
+        LingJiChatRequest currentRequest = new LingJiChatRequest();
+        currentRequest.setModel(previousRequest.getModel());
+        currentRequest.setParameters(previousRequest.getParameters());
         currentRequest.setInput(new Input(conversationHistory));
+
+        this.logger.debug(
+                "Create a new chat request with function calling result [ detail = {} ]",
+                ModelOptionsUtils.toJsonString(currentRequest)
+        );
 
         return currentRequest;
     }
@@ -128,7 +154,15 @@ public class LingJiChatModel
 
     @Override
     protected Message doGetToolResponseMessage(LingJiChatResponse response) {
-        return this.findFirstAssistantFunctionMessage(response);
+        Message toolResponseMessage = this.findFirstAssistantFunctionMessage(response);
+
+        this.logger.debug(
+                "Get tool response message from chat response[ response = {}, message = {} ]",
+                ModelOptionsUtils.toJsonString(response),
+                ModelOptionsUtils.toJsonString(toolResponseMessage)
+        );
+
+        return toolResponseMessage;
     }
 
     @Override
@@ -244,6 +278,12 @@ public class LingJiChatModel
 
         this.doCheckRequest(request);
 
+        this.logger.debug(
+                "Convert prompt to lingji chat request[ source = {}, target = {} ]",
+                ModelOptionsUtils.toJsonString(prompt),
+                ModelOptionsUtils.toJsonString(request)
+        );
+
         return request;
     }
 
@@ -279,7 +319,7 @@ public class LingJiChatModel
                 throw new LingJiException("tool_choice should be null or 'none' when tools is empty");
             }
         } else {
-            if (chatModel.getSupportFunctionCalling()) {
+            if (!chatModel.getSupportFunctionCalling()) {
                 throw new LingJiException(
                         String.format("Model [%s] do not support function calling", chatModel.getName())
                 );
@@ -331,15 +371,21 @@ public class LingJiChatModel
                 new LingJiChatUsage(response.getUsage())
         );
 
-        return new ChatResponse(Collections.singletonList(generation), chatResponseMetadata);
+        ChatResponse chatResponse = new ChatResponse(Collections.singletonList(generation), chatResponseMetadata);
+
+        this.logger.debug(
+                "Convert lingji chat response to chat response [ source = {}, target = {} ]",
+                ModelOptionsUtils.toJsonString(response),
+                ModelOptionsUtils.toJsonString(chatResponse)
+        );
+
+        return chatResponse;
     }
 
     private LingJiChatResponse doRPC(LingJiChatRequest request) {
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug(
-                    "Request LingJi OpenSource Chat Model [ url = {}, request = {} ]",
-                    Constants.LING_JI_CHAT_URL, ModelOptionsUtils.toJsonString(request));
-        }
+        this.logger.debug(
+                "Request LingJi OpenSource Chat Model [ url = {}, request = {} ]",
+                Constants.LING_JI_CHAT_URL, ModelOptionsUtils.toJsonString(request));
 
         ResponseEntity<LingJiChatResponse> responseEntity = this.restClient
                 .post()
@@ -356,11 +402,9 @@ public class LingJiChatModel
         HttpStatusCode httpStatusCode = responseEntity.getStatusCode();
 
         if (httpStatusCode.is2xxSuccessful()) {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug(
-                        "Request LingJi OpenSource Chat Model Success [ response = {} ]",
-                        ModelOptionsUtils.toJsonString(lingJiOpenSourceChatResponse));
-            }
+            this.logger.debug(
+                    "Request LingJi OpenSource Chat Model Success [ response = {} ]",
+                    ModelOptionsUtils.toJsonString(lingJiOpenSourceChatResponse));
 
             return lingJiOpenSourceChatResponse;
         } else {
