@@ -384,7 +384,7 @@ public class LingJiChatModel
 
     private LingJiChatResponse doRPC(LingJiChatRequest request) {
         this.logger.debug(
-                "Request LingJi OpenSource Chat Model [ url = {}, request = {} ]",
+                "Request LingJi Chat Model [ url = {}, request = {} ]",
                 Constants.LING_JI_CHAT_URL, ModelOptionsUtils.toJsonString(request));
 
         ResponseEntity<LingJiChatResponse> responseEntity = this.restClient
@@ -403,7 +403,7 @@ public class LingJiChatModel
 
         if (httpStatusCode.is2xxSuccessful()) {
             this.logger.debug(
-                    "Request LingJi OpenSource Chat Model Success [ response = {} ]",
+                    "Request LingJi Chat Model Success [ response = {} ]",
                     ModelOptionsUtils.toJsonString(lingJiOpenSourceChatResponse));
 
             return lingJiOpenSourceChatResponse;
@@ -411,14 +411,14 @@ public class LingJiChatModel
 
             if (lingJiOpenSourceChatResponse == null) {
                 this.logger.debug(
-                        "Request LingJi OpenSource Chat Model failed [ http_code = {} ]",
+                        "Request LingJi Chat Model failed [ http_code = {} ]",
                         httpStatusCode.value());
 
                 throw new LingJiRPCException(httpStatusCode.value());
             } else {
 
                 this.logger.debug(
-                        "Request LingJi OpenSource Chat Model failed [ http_code = {}, err = {} ]",
+                        "Request LingJi Chat Model failed [ http_code = {}, err = {} ]",
                         httpStatusCode.value(), ModelOptionsUtils.toJsonString(lingJiOpenSourceChatResponse));
 
                 throw new LingJiRPCException(
